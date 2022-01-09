@@ -8,7 +8,7 @@
 
 Name:           gns3-server
 Version:        2.2.29
-Release:        1%{?dist}
+Release:        1%{?dist}.1
 Summary:        Graphical Network Simulator 3
 
 License:        GPLv3
@@ -30,8 +30,9 @@ BuildRequires: make
 
 Requires: busybox
 %if 0%{?fedora} || 0%{?rhel} > 7
-Recommends: docker
-Recommends: qemu-kvm
+Recommends: docker-ce
+Recommends: qemu-kvm-core
+Recommends: qemu-img
 %else
 Requires: docker
 Requires: qemu-kvm
