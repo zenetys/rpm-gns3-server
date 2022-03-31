@@ -39,6 +39,18 @@ Requires: qemu-kvm
 %endif
 Requires: ubridge >= 0.9.14
 
+Requires: python3-aiohttp >= 3.7.4
+Requires: python3-aiohttp-cors >= 0.7.0
+Requires: python3-aiofiles >= 0.7.0
+Requires: python3-async-timeout >= 3.0.1
+Requires: python3-cpuinfo >= 8.0.0
+Requires: python3-distro >= 1.6.0
+Requires: python3-jinja2 >= 3.0.1
+Requires: python3-jsonschema >= 3.2.0
+Requires: python3-markupsafe >= 2.0.0
+Requires: python3-psutil >= 5.8.0
+#Requires: python3-sentry-sdk >= 1.3.1
+
 Provides: bundled(busybox)
 
 
