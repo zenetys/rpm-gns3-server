@@ -43,7 +43,8 @@
 %define py_build_install \
 (\
     export PYTHONUSERBASE=%{buildroot}/%{py_base}\
-    python3 setup.py --no-user-cfg setopt -c easy_install -o allow_hosts -s None\
+    python3 setup.py --no-user-cfg setopt -c easy_install -o index_url -s 'MISSING/'\
+    python3 setup.py --no-user-cfg setopt -c easy_install -o find_links -s 'MISSING/'\
     python3 setup.py --no-user-cfg setopt -c easy_install -o zip_ok -s False\
     python3 setup.py --no-user-cfg build --debug\
     python3 setup.py --no-user-cfg install --skip-build --user --install-lib '%{buildroot}/%{py_site}'\
