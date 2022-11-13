@@ -258,6 +258,8 @@ mkdir -p  %{buildroot}%{_sharedstatedir}/gns3
 # Use distro busybox instead of bundled one
 cp -a %{_sbindir}/busybox \
     %{buildroot}/%{py_site}/*.egg/gns3server/compute/docker/resources/bin/busybox
+%{_usr}/lib/rpm/debugedit --build-id --build-id-seed %{name}-%{version}-%{release} \
+    %{buildroot}/%{py_site}/*.egg/gns3server/compute/docker/resources/bin/busybox
 
 %files
 # gns3-server
