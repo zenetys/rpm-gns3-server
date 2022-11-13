@@ -175,7 +175,6 @@ cd %{vpcs}/src
 sed -i -e 's,CFLAGS=.*,\0 $(LOCAL_CFLAGS),' Makefile.linux
 make -f Makefile.linux %{?_smp_mflags} \
     LOCAL_CFLAGS='-DLINUX_RAW %{?build_cflags:%{build_cflags}} -g'
-#./mk.sh debug %{_arch}
 cd ../..
 
 %install
