@@ -51,7 +51,6 @@
 )\
 %{nil}
 
-
 # Filter auto-generated deps from shell script run in dockers,
 # it would report bad requires:
 # - /gns3/bin/busybox
