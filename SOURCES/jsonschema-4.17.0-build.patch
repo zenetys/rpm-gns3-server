@@ -1,0 +1,17 @@
+--- pyproject.toml	2020-02-02 00:00:00.000000000 +0000
++++ pyproject.toml	2022-11-13 22:09:39.912238512 +0000
+@@ -121,3 +121,9 @@
+   "D412",  # Trailing whitespace plz
+   "D413",  # No trailing whitespace plz
+ ]
++[tool.setuptools.dynamic]
++readme = {file = ["README.rst"]}
++[tool.setuptools.packages.find]
++[tool.setuptools.package-data]
++jsonschema = ["schemas/*.json"]
++[tool.setuptools_scm]
+--- setup.py	1970-01-01 00:00:00.000000000 +0000
++++ setup.py	2022-11-13 22:09:39.917238534 +0000
+@@ -0,0 +1,2 @@
++from setuptools import setup
++setup()

@@ -17,9 +17,8 @@
 %define vpcs_version 0.8.2
 %define vpcs vpcs-%{vpcs_version}
 
-%define python_aiofiles aiofiles-0.8.0
 %define python_aiohttp_cors aiohttp-cors-0.7.0
-%define python_aiohttp aiohttp-3.8.1
+%define python_aiohttp aiohttp-3.8.3
 %define python_aiosignal aiosignal-1.2.0
 %define python_asynctest asynctest-0.13.0
 %define python_async_timeout async-timeout-4.0.2
@@ -27,14 +26,24 @@
 %define python_frozenlist frozenlist-1.2.0
 # idna-ssl available on el8 but not on el9
 %define python_idna_ssl idna-ssl-1.1.0
+%define python_importlib_resources importlib_resources-5.1.4
+%define python_markupsafe MarkupSafe-2.0.0
+%define python_psutil psutil-5.9.2
+%define python_py_cpuinfo py-cpuinfo-9.0.0
+# setuptools_scm is too old on el8
+%define python_setuptools_scm setuptools_scm-6.0.1
+# zipp is too old on el9
+%define python_zipp zipp-3.1.0
+
+%if 0%{?rhel} >= 9
+%define python_aiofiles aiofiles-22.1.0
+%define python_jinja2 Jinja2-3.1.2
+%define python_jsonschema jsonschema-4.17.0
+%define python_setuptools setuptools-65.5.1
+%else
+%define python_aiofiles aiofiles-0.8.0
 %define python_jinja2 Jinja2-3.0.3
 %define python_jsonschema jsonschema-3.2.0
-%define python_markupsafe MarkupSafe-2.0.0
-%define python_psutil psutil-5.9.1
-%define python_py_cpuinfo py-cpuinfo-8.0.0
-%if 0%{?rhel} >= 9
-%define python_setuptools setuptools-60.6.0
-%else
 %define python_setuptools setuptools-59.6.0
 %endif
 
@@ -79,7 +88,7 @@
 %global __requires_exclude_from ^%{py_site}/.*\.egg/gns3server/compute/docker/resources/.*$
 
 Name: gns3-server22z
-Version: 2.2.34
+Version: 2.2.35.1
 Release: 1%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 
@@ -102,15 +111,20 @@ Source260: https://files.pythonhosted.org/packages/source/a/async-timeout/%{pyth
 Source270: https://files.pythonhosted.org/packages/source/d/distro/%{python_distro}.tar.gz
 Source280: https://files.pythonhosted.org/packages/source/f/frozenlist/%{python_frozenlist}.tar.gz
 Source285: https://files.pythonhosted.org/packages/source/i/idna-ssl/%{python_idna_ssl}.tar.gz
+Source288: https://files.pythonhosted.org/packages/source/i/importlib-resources/%{python_importlib_resources}.tar.gz
 Source290: https://files.pythonhosted.org/packages/source/J/Jinja2/%{python_jinja2}.tar.gz
 Source300: https://files.pythonhosted.org/packages/source/j/jsonschema/%{python_jsonschema}.tar.gz
 Source310: https://files.pythonhosted.org/packages/source/M/MarkupSafe/%{python_markupsafe}.tar.gz
 Source320: https://files.pythonhosted.org/packages/source/p/psutil/%{python_psutil}.tar.gz
 Source330: https://files.pythonhosted.org/packages/source/p/py-cpuinfo/%{python_py_cpuinfo}.tar.gz
 Source340: https://files.pythonhosted.org/packages/source/s/setuptools/%{python_setuptools}.tar.gz
+Source350: https://files.pythonhosted.org/packages/source/s/setuptools_scm/%{python_setuptools_scm}.tar.gz
+Source360: https://files.pythonhosted.org/packages/source/z/zipp/%{python_zipp}.tar.gz
 
 Patch0: gns3-server-udhcpc-script-path.patch
 Patch1: gns3-server-privacy.patch
+
+Patch300: jsonschema-4.17.0-build.patch
 
 BuildRequires: busybox
 BuildRequires: cmake
@@ -128,7 +142,14 @@ BuildRequires: python3-importlib-metadata
 BuildRequires: python3-multidict
 BuildRequires: python3-pyrsistent
 BuildRequires: python3-setuptools
-BuildRequires: python3-setuptools_scm
+
+%if 0%{?rhel} >= 9
+BuildRequires: python3-toml
+%else
+BuildRequires: python3-pytoml
+BuildRequires: python3-wheel
+%endif
+
 BuildRequires: python3-six
 BuildRequires: python3-sphinx
 BuildRequires: python3-typing-extensions
@@ -174,6 +195,12 @@ sed -i -r 's/sentry-sdk.*//g' requirements.txt
 for i in %python_modules_build_order; do
     tar xvzf "%{_sourcedir}/$i.tar.gz"
 done
+
+%if 0%{?rhel} >= 9
+cd %{python_jsonschema}
+%patch300 -p0
+cd ..
+%endif
 
 %build
 # Python modules missing or overriden from the distro are built and
