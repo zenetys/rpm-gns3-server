@@ -38,6 +38,27 @@
 %define python_setuptools setuptools-59.6.0
 %endif
 
+%define python_modules_build_order %(echo \\
+    %{python_setuptools} \\
+    %{python_setuptools_scm} \\
+    %{python_aiofiles} \\
+    %{python_async_timeout} \\
+    %{python_frozenlist} \\
+    %{python_aiosignal} \\
+    %{python_asynctest} \\
+    %{python_idna_ssl} \\
+    %{python_aiohttp} \\
+    %{python_aiohttp_cors} \\
+    %{python_distro} \\
+    %{python_markupsafe} \\
+    %{python_zipp} \\
+    %{python_importlib_resources} \\
+    %{python_jinja2} \\
+    %{python_jsonschema} \\
+    %{python_psutil} \\
+    %{python_py_cpuinfo} \\
+)
+
 %define py_base %{_datadir}/%{name}/py
 %define py_site %{py_base}/lib/python%{python3_version}/site-packages
 %define py_build_install \
@@ -149,6 +170,11 @@ sed -i -r 's/sentry-sdk.*//g' requirements.txt
 %setup -n gns3-server-%{version} -T -D -a 120
 %setup -n gns3-server-%{version} -T -D -a 130
 
+# python modules
+for i in %python_modules_build_order; do
+    tar xvzf "%{_sourcedir}/$i.tar.gz"
+done
+
 %build
 # Python modules missing or overriden from the distro are built and
 # installed in the install scriptlet.
@@ -201,30 +227,10 @@ install -p -m 0644 -D -t %{buildroot}/%{_mandir}/man1 man/vpcs.1
 cd ..
 
 # python modules
-python_modules_build_order=(
-    %{python_setuptools}.tar.gz
-    %{python_aiofiles}.tar.gz
-    %{python_async_timeout}.tar.gz
-    %{python_frozenlist}.tar.gz
-    %{python_aiosignal}.tar.gz
-    %{python_asynctest}.tar.gz
-    %{python_idna_ssl}.tar.gz
-    %{python_aiohttp}.tar.gz
-    %{python_aiohttp_cors}.tar.gz
-    %{python_distro}.tar.gz
-    %{python_markupsafe}.tar.gz
-    %{python_jinja2}.tar.gz
-    %{python_jsonschema}.tar.gz
-    %{python_psutil}.tar.gz
-    %{python_py_cpuinfo}.tar.gz
-)
-
-for i in "${python_modules_build_order[@]}"; do
-(
-    tar xvzf "%{_sourcedir}/$i"
-    cd "${i%.tar.gz}"
+for i in %python_modules_build_order; do
+    cd "$i"
     %py_build_install
-)
+    cd ..
 done
 
 # gns3-server
