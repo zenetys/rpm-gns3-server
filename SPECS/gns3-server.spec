@@ -8,7 +8,7 @@
 # When a new release of gns3-server is out, check the requirements.txt
 # file and adjust python modules and versions accordingly.
 
-%define dynamips_version 0.2.22
+%define dynamips_version 0.2.23
 %define dynamips dynamips-%{dynamips_version}
 
 %define ubridge_version 0.9.18
@@ -28,7 +28,7 @@
 %define python_idna_ssl idna-ssl-1.1.0
 %define python_importlib_resources importlib_resources-5.1.4
 %define python_markupsafe MarkupSafe-2.0.0
-%define python_psutil psutil-5.9.2
+%define python_psutil psutil-5.9.4
 %define python_py_cpuinfo py-cpuinfo-9.0.0
 # setuptools_scm is too old on el8
 %define python_setuptools_scm setuptools_scm-6.0.1
@@ -38,7 +38,7 @@
 %if 0%{?rhel} >= 9
 %define python_aiofiles aiofiles-22.1.0
 %define python_jinja2 Jinja2-3.1.2
-%define python_jsonschema jsonschema-4.17.0
+%define python_jsonschema jsonschema-4.17.3
 %define python_setuptools setuptools-65.5.1
 %else
 %define python_aiofiles aiofiles-0.8.0
@@ -88,7 +88,7 @@
 %global __requires_exclude_from ^%{py_site}/.*\.egg/gns3server/compute/docker/resources/.*$
 
 Name: gns3-server22z
-Version: 2.2.35.1
+Version: 2.2.36
 Release: 1%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 
@@ -121,10 +121,7 @@ Source340: https://files.pythonhosted.org/packages/source/s/setuptools/%{python_
 Source350: https://files.pythonhosted.org/packages/source/s/setuptools_scm/%{python_setuptools_scm}.tar.gz
 Source360: https://files.pythonhosted.org/packages/source/z/zipp/%{python_zipp}.tar.gz
 
-Patch0: gns3-server-udhcpc-script-path.patch
-Patch1: gns3-server-privacy.patch
-
-Patch300: jsonschema-4.17.0-build.patch
+Patch300: jsonschema-4.17.3-build.patch
 
 BuildRequires: busybox
 BuildRequires: cmake
@@ -156,6 +153,10 @@ BuildRequires: python3-typing-extensions
 BuildRequires: python3-yarl
 BuildRequires: systemd
 
+# needed for the privacy patch on index.html
+BuildRequires: diffutils
+BuildRequires: gawk
+
 Requires: python3-attrs
 Requires: python3-charset-normalizer
 Requires: python3-importlib-metadata
@@ -164,6 +165,9 @@ Requires: python3-pyrsistent
 Requires: python3-six
 Requires: python3-typing-extensions
 Requires: python3-yarl
+# script program is provided by util-linux
+# it is required for docker support
+Requires: util-linux
 
 %{?systemd_requires}
 
@@ -180,8 +184,19 @@ This is the server package which provides an HTTP REST API for the client (GUI).
 
 %prep
 %setup -n gns3-server-%{version}
-%patch0 -p1
-%patch1 -p1
+
+# A patch file is difficult to maintain due to presence of a random id in patch
+# context that would change on every release, obsolescing the patch file. This
+# aims to remove the Google Analytics tracker and an ad panel.
+cp -a gns3server/static/web-ui/index.html{,.ori}
+gawk '
+/<head>/ { print; print "<style type=\"text/css\">app-adbutler{display:none !important;}</style>"; next; }
+/<script .*googletagmanager/ { print "<!--"; print; next; }
+/gtag\(/ { print; getline; if (/<\/script>/) { print; print "-->"; next; } }
+{ print; }
+' < gns3server/static/web-ui/index.html.ori \
+  > gns3server/static/web-ui/index.html
+diff -u gns3server/static/web-ui/index.html{.ori,} && exit 4
 
 # Relax requirements
 sed -i -r 's/==/>=/g' requirements.txt
@@ -288,9 +303,8 @@ mkdir -p %{buildroot}%{_unitdir}
 install -m 644 %{SOURCE1} %{buildroot}%{_unitdir}
 mkdir -p  %{buildroot}%{_sharedstatedir}/gns3
 
-# Use distro busybox instead of bundled one
-cp -a %{_sbindir}/busybox \
-    %{buildroot}/%{py_site}/*.egg/gns3server/compute/docker/resources/bin/busybox
+# busybox binary from the distro is bundled in this package, make sure the
+# build ID does not conflict with the one from the busybox package
 %{_usr}/lib/rpm/debugedit --build-id --build-id-seed %{name}-%{version}-%{release} \
     %{buildroot}/%{py_site}/*.egg/gns3server/compute/docker/resources/bin/busybox
 
