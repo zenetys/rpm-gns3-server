@@ -88,7 +88,7 @@
 %global __requires_exclude_from ^%{py_site}/.*\.egg/gns3server/compute/docker/resources/.*$
 
 Name: gns3-server22z
-Version: 2.2.36
+Version: 2.2.37
 Release: 1%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 
@@ -311,7 +311,7 @@ mkdir -p  %{buildroot}%{_sharedstatedir}/gns3
 %files
 # gns3-server
 %license LICENSE
-%doc README.rst AUTHORS CHANGELOG
+%doc README.md AUTHORS CHANGELOG
 %doc docs/_build/html
 %{_bindir}/{gns3server,gns3vmnet,gns3loopback}
 %{py_base}/
