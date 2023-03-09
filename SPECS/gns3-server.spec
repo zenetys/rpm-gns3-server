@@ -18,11 +18,11 @@
 %define vpcs vpcs-%{vpcs_version}
 
 %define python_aiohttp_cors aiohttp-cors-0.7.0
-%define python_aiohttp aiohttp-3.8.3
+%define python_aiohttp aiohttp-3.8.4
 %define python_aiosignal aiosignal-1.2.0
 %define python_asynctest asynctest-0.13.0
 %define python_async_timeout async-timeout-4.0.2
-%define python_distro distro-1.7.0
+%define python_distro distro-1.8.0
 %define python_frozenlist frozenlist-1.2.0
 # idna-ssl available on el8 but not on el9
 %define python_idna_ssl idna-ssl-1.1.0
@@ -88,7 +88,7 @@
 %global __requires_exclude_from ^%{py_site}/.*\.egg/gns3server/compute/docker/resources/.*$
 
 Name: gns3-server22z
-Version: 2.2.37
+Version: 2.2.38
 Release: 1%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 
@@ -121,6 +121,7 @@ Source340: https://files.pythonhosted.org/packages/source/s/setuptools/%{python_
 Source350: https://files.pythonhosted.org/packages/source/s/setuptools_scm/%{python_setuptools_scm}.tar.gz
 Source360: https://files.pythonhosted.org/packages/source/z/zipp/%{python_zipp}.tar.gz
 
+Patch270: distro-1.8.0-build.patch
 Patch300: jsonschema-4.17.3-build.patch
 
 BuildRequires: busybox
@@ -210,6 +211,10 @@ sed -i -r 's/sentry-sdk.*//g' requirements.txt
 for i in %python_modules_build_order; do
     tar xvzf "%{_sourcedir}/$i.tar.gz"
 done
+
+cd %{python_distro}
+%patch270 -p0
+cd ..
 
 %if 0%{?rhel} >= 9
 cd %{python_jsonschema}
