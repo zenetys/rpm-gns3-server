@@ -1,10 +1,7 @@
-Supported targets:<br/>
-el8, el9
-
-This RPM spec file creates a single package:<br/>
-gns3-server22z
-
-Provides a single all-in-one gns3-server package  including dynamips, ubridge, vpcs, gns3-server and dependent python modules not available or overriden from the distro.
+| Package&nbsp;name | Supported&nbsp;targets | Includes |
+| :--- | :--- | :--- |
+| gns3-server22z | el8, el9 | gns3-server, dynamips, ubridge, vpcs |
+<br/>
 
 Build:
 
