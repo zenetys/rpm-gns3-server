@@ -88,7 +88,7 @@
 %global __requires_exclude_from ^%{py_site}/.*\.egg/gns3server/compute/docker/resources/.*$
 
 Name: gns3-server22z
-Version: 2.2.40.1
+Version: 2.2.41
 Release: 1%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 
@@ -165,6 +165,7 @@ Requires: python3-multidict
 Requires: python3-pyrsistent
 Requires: python3-six
 Requires: python3-typing-extensions
+Requires: python3-urllib3
 Requires: python3-yarl
 # script program is provided by util-linux
 # it is required for docker support
