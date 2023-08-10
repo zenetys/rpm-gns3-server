@@ -28,7 +28,7 @@
 %define python_idna_ssl idna-ssl-1.1.0
 %define python_importlib_resources importlib_resources-5.1.4
 %define python_markupsafe MarkupSafe-2.0.0
-%define python_psutil psutil-5.9.4
+%define python_psutil psutil-5.9.5
 %define python_py_cpuinfo py-cpuinfo-9.0.0
 # setuptools_scm is too old on el8
 %define python_setuptools_scm setuptools_scm-6.0.1
@@ -36,7 +36,7 @@
 %define python_zipp zipp-3.1.0
 
 %if 0%{?rhel} >= 9
-%define python_aiofiles aiofiles-22.1.0
+%define python_aiofiles aiofiles-23.1.0
 %define python_jinja2 Jinja2-3.1.2
 %define python_jsonschema jsonschema-4.17.3
 %define python_setuptools setuptools-65.5.1
@@ -88,7 +88,7 @@
 %global __requires_exclude_from ^%{py_site}/.*\.egg/gns3server/compute/docker/resources/.*$
 
 Name: gns3-server22z
-Version: 2.2.41
+Version: 2.2.42
 Release: 1%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 
@@ -165,7 +165,6 @@ Requires: python3-multidict
 Requires: python3-pyrsistent
 Requires: python3-six
 Requires: python3-typing-extensions
-Requires: python3-urllib3
 Requires: python3-yarl
 # script program is provided by util-linux
 # it is required for docker support
