@@ -14,7 +14,7 @@
 %define ubridge_version 0.9.18
 %define ubridge ubridge-%{ubridge_version}
 
-%define vpcs_version 0.8.2
+%define vpcs_version 0.8.3
 %define vpcs vpcs-%{vpcs_version}
 
 %define python_aiohttp_cors aiohttp-cors-0.7.0
@@ -89,7 +89,7 @@
 
 Name: gns3-server22z
 Version: 2.2.42
-Release: 1%{?dist}.zenetys
+Release: 2%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 
 License: GPLv3
