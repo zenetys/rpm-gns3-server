@@ -1,3 +1,8 @@
+# Supported targets: el8, el9
+
+# Python version on el8: 3.6
+# Python version on el9: 3.9
+
 # Originally based on Fedora spec file:
 # https://src.fedoraproject.org/rpms/gns3-server/
 #
@@ -18,7 +23,7 @@
 %define vpcs vpcs-%{vpcs_version}
 
 %define python_aiohttp_cors aiohttp-cors-0.7.0
-%define python_aiohttp aiohttp-3.8.4
+%define python_aiohttp aiohttp-3.8.5
 %define python_aiosignal aiosignal-1.2.0
 %define python_asynctest asynctest-0.13.0
 %define python_async_timeout async-timeout-4.0.2
@@ -28,6 +33,8 @@
 %define python_idna_ssl idna-ssl-1.1.0
 %define python_importlib_resources importlib_resources-5.1.4
 %define python_markupsafe MarkupSafe-2.0.0
+# platformdirs is available on el9 but not on el8
+%define python_platformdirs platformdirs-2.4.0
 %define python_psutil psutil-5.9.5
 %define python_py_cpuinfo py-cpuinfo-9.0.0
 # setuptools_scm is too old on el8
@@ -36,7 +43,7 @@
 %define python_zipp zipp-3.1.0
 
 %if 0%{?rhel} >= 9
-%define python_aiofiles aiofiles-23.1.0
+%define python_aiofiles aiofiles-23.2.1
 %define python_jinja2 Jinja2-3.1.2
 %define python_jsonschema jsonschema-4.17.3
 %define python_setuptools setuptools-65.5.1
@@ -66,6 +73,7 @@
     %{python_jsonschema} \\
     %{python_psutil} \\
     %{python_py_cpuinfo} \\
+    %{python_platformdirs} \\
 )
 
 %define py_base %{_datadir}/%{name}/py
@@ -88,8 +96,8 @@
 %global __requires_exclude_from ^%{py_site}/.*\.egg/gns3server/compute/docker/resources/.*$
 
 Name: gns3-server22z
-Version: 2.2.42
-Release: 2%{?dist}.zenetys
+Version: 2.2.43
+Release: 1%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 
 License: GPLv3
@@ -115,14 +123,17 @@ Source288: https://files.pythonhosted.org/packages/source/i/importlib-resources/
 Source290: https://files.pythonhosted.org/packages/source/J/Jinja2/%{python_jinja2}.tar.gz
 Source300: https://files.pythonhosted.org/packages/source/j/jsonschema/%{python_jsonschema}.tar.gz
 Source310: https://files.pythonhosted.org/packages/source/M/MarkupSafe/%{python_markupsafe}.tar.gz
+Source315: https://files.pythonhosted.org/packages/source/p/platformdirs/%{python_platformdirs}.tar.gz
 Source320: https://files.pythonhosted.org/packages/source/p/psutil/%{python_psutil}.tar.gz
 Source330: https://files.pythonhosted.org/packages/source/p/py-cpuinfo/%{python_py_cpuinfo}.tar.gz
 Source340: https://files.pythonhosted.org/packages/source/s/setuptools/%{python_setuptools}.tar.gz
 Source350: https://files.pythonhosted.org/packages/source/s/setuptools_scm/%{python_setuptools_scm}.tar.gz
 Source360: https://files.pythonhosted.org/packages/source/z/zipp/%{python_zipp}.tar.gz
 
+Patch210: aiofiles-23.2.1-build.patch
 Patch270: distro-1.8.0-build.patch
 Patch300: jsonschema-4.17.3-build.patch
+Patch315: platformdirs-2.4.0-build.patch
 
 BuildRequires: busybox
 BuildRequires: cmake
@@ -212,6 +223,12 @@ for i in %python_modules_build_order; do
     tar xvzf "%{_sourcedir}/$i.tar.gz"
 done
 
+%if 0%{?rhel} >= 9
+cd %{python_aiofiles}
+%patch270 -p0
+cd ..
+%endif
+
 cd %{python_distro}
 %patch270 -p0
 cd ..
@@ -221,6 +238,10 @@ cd %{python_jsonschema}
 %patch300 -p0
 cd ..
 %endif
+
+cd %{python_platformdirs}
+%patch315 -p0
+cd ..
 
 %build
 # Python modules missing or overriden from the distro are built and
