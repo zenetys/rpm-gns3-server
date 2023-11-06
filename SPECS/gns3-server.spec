@@ -35,7 +35,7 @@
 %define python_markupsafe MarkupSafe-2.0.0
 # platformdirs is available on el9 but not on el8
 %define python_platformdirs platformdirs-2.4.0
-%define python_psutil psutil-5.9.5
+%define python_psutil psutil-5.9.6
 %define python_py_cpuinfo py-cpuinfo-9.0.0
 # setuptools_scm is too old on el8
 %define python_setuptools_scm setuptools_scm-6.0.1
@@ -96,7 +96,7 @@
 %global __requires_exclude_from ^%{py_site}/.*\.egg/gns3server/compute/docker/resources/.*$
 
 Name: gns3-server22z
-Version: 2.2.43
+Version: 2.2.44
 Release: 1%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 
