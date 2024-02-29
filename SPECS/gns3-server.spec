@@ -1,17 +1,7 @@
 # Supported targets: el8, el9
 
-# Python version on el8: 3.6
-# Python version on el9: 3.9
-
-# Originally based on Fedora spec file:
-# https://src.fedoraproject.org/rpms/gns3-server/
-#
-# Modified to provide a single all-in-one gns3-server package  including
-# dynamips, ubridge, vpcs, gns3-server and dependent python modules not
-# available or overriden from the distro.
-#
-# When a new release of gns3-server is out, check the requirements.txt
-# file and adjust python modules and versions accordingly.
+%define gns3server_version 2.2.46
+%define gns3server gns3-server-%{gns3server_version}
 
 %define dynamips_version 0.2.23
 %define dynamips dynamips-%{dynamips_version}
@@ -22,81 +12,17 @@
 %define vpcs_version 0.8.3
 %define vpcs vpcs-%{vpcs_version}
 
-%define python_aiohttp_cors aiohttp-cors-0.7.0
-%define python_aiohttp aiohttp-3.8.5
-%define python_aiosignal aiosignal-1.2.0
-%define python_asynctest asynctest-0.13.0
-%define python_async_timeout async-timeout-4.0.2
-%define python_distro distro-1.8.0
-%define python_frozenlist frozenlist-1.2.0
-# idna-ssl available on el8 but not on el9
-%define python_idna_ssl idna-ssl-1.1.0
-%define python_importlib_resources importlib_resources-5.1.4
-%define python_markupsafe MarkupSafe-2.0.0
-# platformdirs is available on el9 but not on el8
-%define python_platformdirs platformdirs-2.4.0
-%define python_psutil psutil-5.9.6
-%define python_py_cpuinfo py-cpuinfo-9.0.0
-# setuptools_scm is too old on el8
-%define python_setuptools_scm setuptools_scm-6.0.1
-# zipp is too old on el9
-%define python_zipp zipp-3.1.0
-
-%if 0%{?rhel} >= 9
-%define python_aiofiles aiofiles-23.2.1
-%define python_jinja2 Jinja2-3.1.2
-%define python_jsonschema jsonschema-4.17.3
-%define python_setuptools setuptools-65.5.1
-%else
-%define python_aiofiles aiofiles-0.8.0
-%define python_jinja2 Jinja2-3.0.3
-%define python_jsonschema jsonschema-3.2.0
-%define python_setuptools setuptools-59.6.0
-%endif
-
-%define python_modules_build_order %(echo \\
-    %{python_setuptools} \\
-    %{python_setuptools_scm} \\
-    %{python_aiofiles} \\
-    %{python_async_timeout} \\
-    %{python_frozenlist} \\
-    %{python_aiosignal} \\
-    %{python_asynctest} \\
-    %{python_idna_ssl} \\
-    %{python_aiohttp} \\
-    %{python_aiohttp_cors} \\
-    %{python_distro} \\
-    %{python_markupsafe} \\
-    %{python_zipp} \\
-    %{python_importlib_resources} \\
-    %{python_jinja2} \\
-    %{python_jsonschema} \\
-    %{python_psutil} \\
-    %{python_py_cpuinfo} \\
-    %{python_platformdirs} \\
-)
-
+%define py_version 3.9
 %define py_base %{_datadir}/%{name}/py
-%define py_site %{py_base}/lib/python%{python3_version}/site-packages
-%define py_build_install \
-(\
-    export PYTHONUSERBASE=%{buildroot}/%{py_base}\
-    python3 setup.py --no-user-cfg setopt -c easy_install -o index_url -s 'MISSING/'\
-    python3 setup.py --no-user-cfg setopt -c easy_install -o find_links -s 'MISSING/'\
-    python3 setup.py --no-user-cfg setopt -c easy_install -o zip_ok -s False\
-    python3 setup.py --no-user-cfg build --debug\
-    python3 setup.py --no-user-cfg install --skip-build --user --install-lib '%{buildroot}/%{py_site}'\
-)\
-%{nil}
 
 # Filter auto-generated deps from shell script run in dockers,
 # it would report bad requires:
 # - /gns3/bin/busybox
 # - /tmp/gns3/bin/sh
-%global __requires_exclude_from ^%{py_site}/.*\.egg/gns3server/compute/docker/resources/.*$
+%global __requires_exclude_from ^%{py_base}/.*/gns3server/compute/docker/resources/.*$
 
 Name: gns3-server22z
-Version: 2.2.44.1
+Version: 2.2.46
 Release: 1%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 
@@ -110,79 +36,32 @@ Source110: https://github.com/GNS3/dynamips/archive/v%{dynamips_version}/%{dynam
 Source120: https://github.com/GNS3/ubridge/archive/v%{ubridge_version}/%{ubridge}.tar.gz
 Source130: https://github.com/GNS3/vpcs/archive/v%{vpcs_version}/%{vpcs}.tar.gz
 
-Source210: https://files.pythonhosted.org/packages/source/a/aiofiles/%{python_aiofiles}.tar.gz
-Source220: https://files.pythonhosted.org/packages/source/a/aiohttp/%{python_aiohttp}.tar.gz
-Source230: https://files.pythonhosted.org/packages/source/a/aiohttp-cors/%{python_aiohttp_cors}.tar.gz
-Source240: https://files.pythonhosted.org/packages/source/a/aiosignal/%{python_aiosignal}.tar.gz
-Source250: https://files.pythonhosted.org/packages/source/a/asynctest/%{python_asynctest}.tar.gz
-Source260: https://files.pythonhosted.org/packages/source/a/async-timeout/%{python_async_timeout}.tar.gz
-Source270: https://files.pythonhosted.org/packages/source/d/distro/%{python_distro}.tar.gz
-Source280: https://files.pythonhosted.org/packages/source/f/frozenlist/%{python_frozenlist}.tar.gz
-Source285: https://files.pythonhosted.org/packages/source/i/idna-ssl/%{python_idna_ssl}.tar.gz
-Source288: https://files.pythonhosted.org/packages/source/i/importlib-resources/%{python_importlib_resources}.tar.gz
-Source290: https://files.pythonhosted.org/packages/source/J/Jinja2/%{python_jinja2}.tar.gz
-Source300: https://files.pythonhosted.org/packages/source/j/jsonschema/%{python_jsonschema}.tar.gz
-Source310: https://files.pythonhosted.org/packages/source/M/MarkupSafe/%{python_markupsafe}.tar.gz
-Source315: https://files.pythonhosted.org/packages/source/p/platformdirs/%{python_platformdirs}.tar.gz
-Source320: https://files.pythonhosted.org/packages/source/p/psutil/%{python_psutil}.tar.gz
-Source330: https://files.pythonhosted.org/packages/source/p/py-cpuinfo/%{python_py_cpuinfo}.tar.gz
-Source340: https://files.pythonhosted.org/packages/source/s/setuptools/%{python_setuptools}.tar.gz
-Source350: https://files.pythonhosted.org/packages/source/s/setuptools_scm/%{python_setuptools_scm}.tar.gz
-Source360: https://files.pythonhosted.org/packages/source/z/zipp/%{python_zipp}.tar.gz
-
-Patch210: aiofiles-23.2.1-build.patch
-Patch270: distro-1.8.0-build.patch
-Patch300: jsonschema-4.17.3-build.patch
-Patch315: platformdirs-2.4.0-build.patch
-
-BuildRequires: busybox
 BuildRequires: cmake
 BuildRequires: elfutils-libelf-devel
 BuildRequires: gcc
-BuildRequires: elfutils-libelf-devel
 BuildRequires: libcap
 BuildRequires: libnl3-devel
 BuildRequires: libpcap-devel
 BuildRequires: make
-BuildRequires: python3-attrs
-BuildRequires: python3-charset-normalizer
-BuildRequires: python3-devel
-BuildRequires: python3-importlib-metadata
-BuildRequires: python3-multidict
-BuildRequires: python3-pyrsistent
-BuildRequires: python3-setuptools
-
-%if 0%{?rhel} >= 9
-BuildRequires: python3-toml
-%else
-BuildRequires: python3-pytoml
-BuildRequires: python3-wheel
-%endif
-
-BuildRequires: python3-six
-BuildRequires: python3-sphinx
-BuildRequires: python3-typing-extensions
-BuildRequires: python3-yarl
+BuildRequires: python%{py_version}
+BuildRequires: python%{py_version}dist(pip)
 BuildRequires: systemd
 
 # needed for the privacy patch on index.html
 BuildRequires: diffutils
 BuildRequires: gawk
 
-Requires: python3-attrs
-Requires: python3-charset-normalizer
-Requires: python3-importlib-metadata
-Requires: python3-multidict
-Requires: python3-pyrsistent
-Requires: python3-six
-Requires: python3-typing-extensions
-Requires: python3-yarl
+Requires: python%{py_version}
 # script program is provided by util-linux
 # it is required for docker support
 Requires: util-linux
 
 %{?systemd_requires}
 
+# busybox is available in epel repos
+# - el8: epel-next
+# - el9: epel
+Recommends: busybox
 Recommends: docker-ce
 Recommends: qemu-kvm-core
 Recommends: qemu-img
@@ -195,8 +74,11 @@ workstations to powerful routers.
 This is the server package which provides an HTTP REST API for the client (GUI).
 
 %prep
-%setup -n gns3-server-%{version}
+%setup -c -T
 
+# gns3-server
+%setup -T -D -a 0
+cd %{gns3server}
 # A patch file is difficult to maintain due to presence of a random id in patch
 # context that would change on every release, obsolescing the patch file. This
 # aims to remove the Google Analytics tracker and an ad panel.
@@ -209,44 +91,31 @@ gawk '
 ' < gns3server/static/web-ui/index.html.ori \
   > gns3server/static/web-ui/index.html
 diff -u gns3server/static/web-ui/index.html{.ori,} && exit 4
-
-# Relax requirements
-sed -i -r 's/==/>=/g' requirements.txt
-sed -i -r 's/sentry-sdk.*//g' requirements.txt
-
-%setup -n gns3-server-%{version} -T -D -a 110
-%setup -n gns3-server-%{version} -T -D -a 120
-%setup -n gns3-server-%{version} -T -D -a 130
-
 # python modules
-for i in %python_modules_build_order; do
-    tar xvzf "%{_sourcedir}/$i.tar.gz"
-done
-
-%if 0%{?rhel} >= 9
-cd %{python_aiofiles}
-%patch270 -p0
+sig=$(md5sum requirements.txt |gawk '{print $1}')
+if [ -f "%_sourcedir/pymod_${sig}_%{_arch}.tar.xz" ]; then
+    tar xvJf "%{_sourcedir}/pymod_${sig}_%{_arch}.tar.xz" -C ../
+else
+    pip%{py_version} download \
+        --no-cache-dir \
+        --dest "../pymod_${sig}_%{_arch}" \
+        --progress-bar off \
+        -r requirements.txt
+    tar cJf "%{_sourcedir}/pymod_${sig}_%{_arch}.tar.xz" \
+        "../pymod_${sig}_%{_arch}"
+fi
 cd ..
-%endif
 
-cd %{python_distro}
-%patch270 -p0
-cd ..
+# dynamips
+%setup -T -D -a 110
 
-%if 0%{?rhel} >= 9
-cd %{python_jsonschema}
-%patch300 -p0
-cd ..
-%endif
+# ubridge
+%setup -T -D -a 120
 
-cd %{python_platformdirs}
-%patch315 -p0
-cd ..
+# vpcs
+%setup -T -D -a 130
 
 %build
-# Python modules missing or overriden from the distro are built and
-# installed in the install scriptlet.
-
 # dynamips
 cd %{dynamips}
 cmake \
@@ -294,18 +163,26 @@ install -p -m 0644 -D -t %{buildroot}/%{_datadir}/licenses/%{name}/vpcs COPYING
 install -p -m 0644 -D -t %{buildroot}/%{_mandir}/man1 man/vpcs.1
 cd ..
 
-# python modules
-for i in %python_modules_build_order; do
-    cd "$i"
-    %py_build_install
-    cd ..
-done
-
 # gns3-server
-%py_build_install
+cd %{gns3server}
+mkdir -p %{buildroot}/%{py_base}/lib
+ln -s lib %{buildroot}/%{py_base}/%{_lib} # lib64 -> lib
+sig=$(md5sum requirements.txt |gawk '{print $1}')
+for i in '-r requirements.txt' './'; do
+    PYTHONUSERBASE='%{buildroot}/%{py_base}' \
+    pip%{py_version} install \
+        --user \
+        --no-cache-dir \
+        --progress-bar off \
+        --no-index \
+        --find-links "../pymod_${sig}_%{_arch}" \
+        --no-warn-script-location \
+        $i
+done
+cd ..
 
 # Python wrapper with env PYTHONUSERBASE for bin scripts
-echo $'#!/bin/sh\nPYTHONUSERBASE=%{py_base} exec /usr/bin/env python3 "$@"' \
+echo $'#!/bin/sh\nPYTHONUSERBASE=%{py_base} exec /usr/bin/env python%{py_version} "$@"' \
     > %{buildroot}/%{py_base}/pywrap
 chmod 755 %{buildroot}/%{py_base}/pywrap
 sed -i -e '1i #!%{py_base}/pywrap' -e '1d' %{buildroot}/%{py_base}/bin/*
@@ -320,25 +197,15 @@ find %{buildroot}/%{py_base}/ -name '*.py' -print \
 # Remove empty files
 find %{buildroot}/ -type f -name .gitkeep -delete
 
-# Build the docs
-make -j8 -C docs html
-rm docs/_build/html/.buildinfo
-
 # Systemd service
 mkdir -p %{buildroot}%{_unitdir}
 install -m 644 %{SOURCE1} %{buildroot}%{_unitdir}
 mkdir -p  %{buildroot}%{_sharedstatedir}/gns3
 
-# busybox binary from the distro is bundled in this package, make sure the
-# build ID does not conflict with the one from the busybox package
-%{_usr}/lib/rpm/debugedit --build-id --build-id-seed %{name}-%{version}-%{release} \
-    %{buildroot}/%{py_site}/*.egg/gns3server/compute/docker/resources/bin/busybox
-
 %files
 # gns3-server
-%license LICENSE
-%doc README.md AUTHORS CHANGELOG
-%doc docs/_build/html
+%license %{gns3server}/LICENSE
+%doc %{gns3server}/README.md %{gns3server}/AUTHORS %{gns3server}/CHANGELOG
 %{_bindir}/{gns3server,gns3vmnet,gns3loopback}
 %{py_base}/
 %{_unitdir}/gns3.service
