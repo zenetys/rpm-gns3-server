@@ -1,6 +1,6 @@
 # Supported targets: el8, el9
 
-%define gns3server_version 2.2.46
+%define gns3server_version 2.2.47
 %define gns3server gns3-server-%{gns3server_version}
 
 %define dynamips_version 0.2.23
@@ -22,7 +22,7 @@
 %global __requires_exclude_from ^%{py_base}/.*/gns3server/compute/docker/resources/.*$
 
 Name: gns3-server22z
-Version: 2.2.46
+Version: %{gns3server_version}
 Release: 1%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 

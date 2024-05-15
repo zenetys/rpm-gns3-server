@@ -1,4 +1,4 @@
-gns3-server 2.2.46 json:map(.html_url)[]:.+ https://api.github.com/repos/GNS3/gns3-server/releases <v([0-9.]+)
+gns3-server 2.2.47 json:map(.html_url)[]:.+ https://api.github.com/repos/GNS3/gns3-server/releases <v([0-9.]+)
 dynamips 0.2.23 json https://api.github.com/repos/GNS3/dynamips/tags =v([0-9.]+)
 ubridge 0.9.18 json https://api.github.com/repos/GNS3/ubridge/tags =v([0-9.]+)
 vpcs 0.8.3 json https://api.github.com/repos/GNS3/vpcs/tags =v([0-9.]+)
