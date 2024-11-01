@@ -1,12 +1,12 @@
 # Supported targets: el8, el9
 
-%define gns3server_version 2.2.49
+%define gns3server_version 2.2.50
 %define gns3server gns3-server-%{gns3server_version}
 
 %define dynamips_version 0.2.23
 %define dynamips dynamips-%{dynamips_version}
 
-%define ubridge_version 0.9.18
+%define ubridge_version 0.9.19
 %define ubridge ubridge-%{ubridge_version}
 
 %define vpcs_version 0.8.3
@@ -155,7 +155,7 @@ cd ..
 # ubridge
 cd %{ubridge}
 install -p -m 4755 -D -t %{buildroot}/%{_bindir} ubridge
-install -p -m 0644 -D -t %{buildroot}/%{_docdir}/%{name}/ubridge README.rst
+install -p -m 0644 -D -t %{buildroot}/%{_docdir}/%{name}/ubridge README.md
 install -p -m 0644 -D -t %{buildroot}/%{_datadir}/licenses/%{name}/ubridge LICENSE
 cd ..
 
