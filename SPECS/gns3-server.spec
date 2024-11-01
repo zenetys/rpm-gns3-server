@@ -21,7 +21,7 @@
 # - /tmp/gns3/bin/sh
 %global __requires_exclude_from ^%{py_base}/.*/gns3server/compute/docker/resources/.*$
 
-Name: gns3-server22z
+Name: gns3-server-22z
 Version: %{gns3server_version}
 Release: 1%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
@@ -65,6 +65,10 @@ Recommends: busybox
 Recommends: docker-ce
 Recommends: qemu-kvm-core
 Recommends: qemu-img
+
+# old package name
+Obsoletes: gns3-server22z
+Provides: gns3-server22z
 
 %description
 GNS3 is a graphical network simulator that allows you to design complex network

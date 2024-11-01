@@ -1,6 +1,6 @@
 | Package&nbsp;name | Supported&nbsp;targets | Includes |
 | :--- | :--- | :--- |
-| gns3-server22z | el8, el9 | gns3-server, dynamips, ubridge, vpcs |
+| gns3-server-22z | el8, el9 | gns3-server, dynamips, ubridge, vpcs |
 <br/>
 
 ## Build:
