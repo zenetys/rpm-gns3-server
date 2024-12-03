@@ -1,6 +1,6 @@
 # Supported targets: el8, el9
 
-%define gns3server_version 2.2.51
+%define gns3server_version 2.2.52
 %define gns3server gns3-server-%{gns3server_version}
 
 %define dynamips_version 0.2.23
@@ -31,7 +31,6 @@ URL: http://gns3.com
 
 Source0: https://github.com/GNS3/gns3-server/archive/v%{version}/%{name}-%{version}.tar.gz
 Source1: gns3.service
-Patch0: gns3-server-2.2.51-setuptools-requirement.patch
 
 Source110: https://github.com/GNS3/dynamips/archive/v%{dynamips_version}/%{dynamips}.tar.gz
 Source120: https://github.com/GNS3/ubridge/archive/v%{ubridge_version}/%{ubridge}.tar.gz
@@ -84,7 +83,6 @@ This is the server package which provides an HTTP REST API for the client (GUI).
 # gns3-server
 %setup -T -D -a 0
 cd %{gns3server}
-%patch0 -p1
 # A patch file is difficult to maintain due to presence of a random id in patch
 # context that would change on every release, obsolescing the patch file. This
 # aims to remove the Google Analytics tracker and an ad panel.
@@ -185,8 +183,6 @@ for i in '-r requirements.txt' './'; do
         --no-warn-script-location \
         $i
 done
-# remove setuptools, only needed to build and install
-rm -rf %{buildroot}/%{py_base}/lib/python%{py_version}/site-packages/setuptools{,-*}
 cd ..
 
 # Python wrapper with env PYTHONUSERBASE for bin scripts

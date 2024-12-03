@@ -1,7 +1,0 @@
---- a/requirements.txt	2024-11-07 06:08:27.000000000 +0100
-+++ b/requirements.txt	2024-11-07 22:24:11.759789617 +0100
-@@ -11,3 +11,4 @@
- platformdirs>=2.4.0
- importlib-resources>=1.3; python_version < '3.9'
- truststore>=0.10.0; python_version >= '3.10'
-+setuptools>=61.0
