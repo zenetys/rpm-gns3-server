@@ -29,7 +29,7 @@ Summary: Graphical Network Simulator 3
 License: GPLv3
 URL: http://gns3.com
 
-Source0: https://github.com/GNS3/gns3-server/archive/v%{version}/%{name}-%{version}.tar.gz
+Source0: https://github.com/GNS3/gns3-server/archive/v%{version}/%{gns3server}.tar.gz
 Source1: gns3.service
 
 Source110: https://github.com/GNS3/dynamips/archive/v%{dynamips_version}/%{dynamips}.tar.gz
