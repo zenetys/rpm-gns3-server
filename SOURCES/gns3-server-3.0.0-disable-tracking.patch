@@ -1,0 +1,28 @@
+--- a/gns3server/static/web-ui/index.html	2024-12-21 14:47:40.364257090 +0100
++++ b/gns3server/static/web-ui/index.html	2024-12-21 14:47:42.028266928 +0100
+@@ -1,6 +1,7 @@
+ <!DOCTYPE html><html lang="en"><head>
+     <meta charset="utf-8">
+     <title>GNS3 Web UI</title>
++    <style type="text/css">app-adbutler{display:none !important;}</style>
+     <!-- It's important to have base here because of the script below //-->
+     <base href="/static/web-ui/">
+ 
+@@ -36,6 +37,7 @@
+   <body class="mat-app-background" oncontextmenu="return false;">
+     <app-root></app-root>
+     <!-- Global site tag (gtag.js) - Google Analytics -->
++    <!--
+     <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-0BT7QQV1W1"></script>
+     <script>
+       window.dataLayer = window.dataLayer || [];
+@@ -46,6 +48,8 @@
+ 
+       gtag('config', 'G-0BT7QQV1W1');
+     </script>
++    -->
++    <script>function gtag() {}</script>
+   <!-- gns3ui js script -->
+ 
+ </body></html>
+\ No newline at end of file

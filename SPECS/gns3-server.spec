@@ -1,6 +1,6 @@
 # Supported targets: el8, el9
 
-%define gns3server_version 2.2.52
+%define gns3server_version 3.0.0
 %define gns3server gns3-server-%{gns3server_version}
 
 %define dynamips_version 0.2.23
@@ -14,6 +14,8 @@
 
 %define py_version 3.9
 %define py_base %{_datadir}/%{name}/py
+%define py_build_extra 'setuptools>=61.0' 'wheel'
+%define py_mod_bundle_sig_meta %{py_version}_%{_arch}_%{?dist}
 
 # Filter auto-generated deps from shell script run in dockers,
 # it would report bad requires:
@@ -21,7 +23,7 @@
 # - /tmp/gns3/bin/sh
 %global __requires_exclude_from ^%{py_base}/.*/gns3server/compute/docker/resources/.*$
 
-Name: gns3-server-22z
+Name: gns3-server-30z
 Version: %{gns3server_version}
 Release: 1%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
@@ -31,6 +33,7 @@ URL: http://gns3.com
 
 Source0: https://github.com/GNS3/gns3-server/archive/v%{version}/%{gns3server}.tar.gz
 Source1: gns3.service
+Patch0: gns3-server-3.0.0-disable-tracking.patch
 
 Source110: https://github.com/GNS3/dynamips/archive/v%{dynamips_version}/%{dynamips}.tar.gz
 Source120: https://github.com/GNS3/ubridge/archive/v%{ubridge_version}/%{ubridge}.tar.gz
@@ -38,6 +41,7 @@ Source130: https://github.com/GNS3/vpcs/archive/v%{vpcs_version}/%{vpcs}.tar.gz
 
 BuildRequires: cmake
 BuildRequires: elfutils-libelf-devel
+BuildRequires: gawk
 BuildRequires: gcc
 BuildRequires: libcap
 BuildRequires: libnl3-devel
@@ -45,11 +49,8 @@ BuildRequires: libpcap-devel
 BuildRequires: make
 BuildRequires: python%{py_version}
 BuildRequires: python%{py_version}dist(pip)
+BuildRequires: sed
 BuildRequires: systemd
-
-# needed for the privacy patch on index.html
-BuildRequires: diffutils
-BuildRequires: gawk
 
 Requires: python%{py_version}
 # script program is provided by util-linux
@@ -66,10 +67,6 @@ Recommends: docker-ce
 Recommends: qemu-kvm-core
 Recommends: qemu-img
 
-# old package name
-Obsoletes: gns3-server22z
-Provides: gns3-server22z
-
 %description
 GNS3 is a graphical network simulator that allows you to design complex network
 topologies. You may run simulations or configure devices ranging from simple
@@ -83,30 +80,27 @@ This is the server package which provides an HTTP REST API for the client (GUI).
 # gns3-server
 %setup -T -D -a 0
 cd %{gns3server}
-# A patch file is difficult to maintain due to presence of a random id in patch
-# context that would change on every release, obsolescing the patch file. This
-# aims to remove the Google Analytics tracker and an ad panel.
-cp -a gns3server/static/web-ui/index.html{,.ori}
-gawk '
-/<head>/ { print; print "<style type=\"text/css\">app-adbutler{display:none !important;}</style>"; next; }
-/<script .*googletagmanager/ { print "<!--"; print; next; }
-/gtag\(/ { print; getline; if (/<\/script>/) { print; print "-->"; next; } }
-{ print; }
-' < gns3server/static/web-ui/index.html.ori \
-  > gns3server/static/web-ui/index.html
-diff -u gns3server/static/web-ui/index.html{.ori,} && exit 4
+# Patch web-ui index.html to remove the Google Analytics tracker and an ad panel.
+# The patch is difficult to maintain due to presence of a random id in patch
+# context that changes on every release, hence this little trick...
+gns3ui_js=$(grep -E '<script src="(runtime|polyfills|main)\.' gns3server/static/web-ui/index.html |sed -zre 's,\n(.),\x16\1,g')
+gawk -v "gns3ui_js=$gns3ui_js" '/<!-- gns3ui js script/ { print " " gns3ui_js; next; } { print; }' %{PATCH0} |
+    patch -p1 -b -z .gtag
+sed -i -re 's,\x16,\n,g' gns3server/static/web-ui/index.html
+diff -u gns3server/static/web-ui/index.html{.gtag,} && exit 4
 # python modules
-sig=$(md5sum requirements.txt |gawk '{print $1}')
-if [ -f "%_sourcedir/pymod_${sig}_%{_arch}.tar.xz" ]; then
-    tar xvJf "%{_sourcedir}/pymod_${sig}_%{_arch}.tar.xz" -C ../
+sig=$(IFS=$'\n'; { cat requirements.txt; echo %{py_build_extra} %{py_mod_bundle_sig_meta}; } |
+    md5sum |gawk '{print $1}')
+if [ -f "%_sourcedir/pymod_${sig}.tar.xz" ]; then
+    tar xvJf "%{_sourcedir}/pymod_${sig}.tar.xz" -C ../
 else
     pip%{py_version} download \
         --no-cache-dir \
-        --dest "../pymod_${sig}_%{_arch}" \
+        --dest "../pymod_${sig}" \
         --progress-bar off \
-        -r requirements.txt
-    tar cJf "%{_sourcedir}/pymod_${sig}_%{_arch}.tar.xz" \
-        "../pymod_${sig}_%{_arch}"
+        -r requirements.txt %{py_build_extra}
+    tar cJf "%{_sourcedir}/pymod_${sig}.tar.xz" \
+        "../pymod_${sig}"
 fi
 cd ..
 
@@ -171,18 +165,22 @@ cd ..
 cd %{gns3server}
 mkdir -p %{buildroot}/%{py_base}/lib
 ln -s lib %{buildroot}/%{py_base}/%{_lib} # lib64 -> lib
-sig=$(md5sum requirements.txt |gawk '{print $1}')
-for i in '-r requirements.txt' './'; do
+sig=$(IFS=$'\n'; { cat requirements.txt; echo %{py_build_extra} %{py_mod_bundle_sig_meta}; } |
+    md5sum |gawk '{print $1}')
+for i in '-r requirements.txt' %{py_build_extra} './'; do
     PYTHONUSERBASE='%{buildroot}/%{py_base}' \
-    pip%{py_version} install \
-        --user \
-        --no-cache-dir \
-        --progress-bar off \
-        --no-index \
-        --find-links "../pymod_${sig}_%{_arch}" \
-        --no-warn-script-location \
-        $i
+        pip%{py_version} install \
+            --user \
+            --no-cache-dir \
+            --progress-bar off \
+            --no-index \
+            --find-links "../pymod_${sig}" \
+            --no-warn-script-location \
+            $i
 done
+# remove extra modules only needed to build and install
+PYTHONUSERBASE='%{buildroot}/%{py_base}' \
+    pip%{py_version} uninstall -y %{py_build_extra}
 cd ..
 
 # Python wrapper with env PYTHONUSERBASE for bin scripts
@@ -192,7 +190,7 @@ chmod 755 %{buildroot}/%{py_base}/pywrap
 sed -i -e '1i #!%{py_base}/pywrap' -e '1d' %{buildroot}/%{py_base}/bin/*
 # Move gns3 scripts to system bin
 mkdir -p %{buildroot}/%{_bindir}
-mv %{buildroot}/%{py_base}/bin/{gns3loopback,gns3server,gns3vmnet} %{buildroot}/%{_bindir}/
+mv %{buildroot}/%{py_base}/bin/{gns3server,gns3vmnet} %{buildroot}/%{_bindir}/
 
 # Remove python shebang in .py files
 find %{buildroot}/%{py_base}/ -name '*.py' -print \
@@ -209,8 +207,8 @@ mkdir -p  %{buildroot}%{_sharedstatedir}/gns3
 %files
 # gns3-server
 %license %{gns3server}/LICENSE
-%doc %{gns3server}/README.md %{gns3server}/AUTHORS %{gns3server}/CHANGELOG
-%{_bindir}/{gns3server,gns3vmnet,gns3loopback}
+%doc %{gns3server}/README.md %{gns3server}/CHANGELOG
+%{_bindir}/{gns3server,gns3vmnet}
 %{py_base}/
 %{_unitdir}/gns3.service
 %dir %attr(0755,gns3,gns3) %{_sharedstatedir}/gns3
