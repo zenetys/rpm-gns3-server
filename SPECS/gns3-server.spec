@@ -89,7 +89,7 @@ gawk -v "gns3ui_js=$gns3ui_js" '/<!-- gns3ui js script/ { print " " gns3ui_js; n
 sed -i -re 's,\x16,\n,g' gns3server/static/web-ui/index.html
 diff -u gns3server/static/web-ui/index.html{.gtag,} && exit 4
 # python modules
-sig=$(IFS=$'\n'; { cat requirements.txt; echo %{py_build_extra} %{py_mod_bundle_sig_meta}; } |
+sig=$({ cat requirements.txt; echo %{py_build_extra} %{py_mod_bundle_sig_meta}; } |
     md5sum |gawk '{print $1}')
 if [ -f "%_sourcedir/pymod_${sig}.tar.xz" ]; then
     tar xvJf "%{_sourcedir}/pymod_${sig}.tar.xz" -C ../
@@ -165,7 +165,7 @@ cd ..
 cd %{gns3server}
 mkdir -p %{buildroot}/%{py_base}/lib
 ln -s lib %{buildroot}/%{py_base}/%{_lib} # lib64 -> lib
-sig=$(IFS=$'\n'; { cat requirements.txt; echo %{py_build_extra} %{py_mod_bundle_sig_meta}; } |
+sig=$({ cat requirements.txt; echo %{py_build_extra} %{py_mod_bundle_sig_meta}; } |
     md5sum |gawk '{print $1}')
 for i in '-r requirements.txt' %{py_build_extra} './'; do
     PYTHONUSERBASE='%{buildroot}/%{py_base}' \
