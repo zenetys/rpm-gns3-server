@@ -1,6 +1,6 @@
 # Supported targets: el8, el9
 
-%define gns3server_version 3.0.4
+%define gns3server_version 3.0.5
 %define gns3server gns3-server-%{gns3server_version}
 
 %define dynamips_version 0.2.23
@@ -80,6 +80,12 @@ This is the server package which provides an HTTP REST API for the client (GUI).
 # gns3-server
 %setup -T -D -a 0
 cd %{gns3server}
+# gns3-server 3.0.5
+# ERROR: Double requirement given: async-timeout<5.1,>=5.0.1 (from
+# -r requirements.txt (line 12)) (already in async-timeout==5.0.1
+# (from -r requirements.txt (line 7)), name='async-timeout')
+sed -i -e '/^async-timeout>=5\.0\.1,<5\.1$/d' requirements.txt
+
 # Patch web-ui index.html to remove the Google Analytics tracker and an ad panel.
 # The patch is difficult to maintain due to presence of a random id in patch
 # context that changes on every release, hence this little trick...
