@@ -1,6 +1,6 @@
 # Supported targets: el8, el9
 
-%define gns3server_version 3.0.5
+%define gns3server_version 3.0.6
 %define gns3server gns3-server-%{gns3server_version}
 
 %define dynamips_version 0.2.23
