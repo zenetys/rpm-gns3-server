@@ -6,7 +6,7 @@
 %define dynamips_version 0.2.24
 %define dynamips dynamips-%{dynamips_version}
 
-%define ubridge_version 0.9.19
+%define ubridge_version 1.0.1
 %define ubridge ubridge-%{ubridge_version}
 
 %define vpcs_version 0.8.3
@@ -25,7 +25,7 @@
 
 Name: gns3-server-30z
 Version: %{gns3server_version}
-Release: 2%{?dist}.zenetys
+Release: 3%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 
 License: GPLv3
