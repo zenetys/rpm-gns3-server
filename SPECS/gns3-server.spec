@@ -1,4 +1,4 @@
-# Supported targets: el8, el9
+# Supported targets: el8, el9, el10
 
 %define gns3server_version 3.0.6
 %define gns3server gns3-server-%{gns3server_version}
@@ -12,7 +12,11 @@
 %define vpcs_version 0.8.3
 %define vpcs vpcs-%{vpcs_version}
 
+%if 0%{?rhel} >= 10
+%define py_version 3.12
+%else
 %define py_version 3.9
+%endif
 %define py_base %{_datadir}/%{name}/py
 %define py_build_extra 'setuptools>=61.0' 'wheel'
 %define py_mod_bundle_sig_meta %{py_version}_%{_arch}_%{?dist}
@@ -61,7 +65,7 @@ Requires: util-linux
 
 # busybox is available in epel repos
 # - el8: epel-next
-# - el9: epel
+# - el9, el10: epel
 Recommends: busybox
 Recommends: docker-ce
 Recommends: qemu-kvm-core
