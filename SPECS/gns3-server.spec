@@ -9,7 +9,7 @@
 %define ubridge_version 1.1.1
 %define ubridge ubridge-%{ubridge_version}
 
-%define vpcs_version 0.8.3
+%define vpcs_version 0.8.4
 %define vpcs vpcs-%{vpcs_version}
 
 %if 0%{?rhel} >= 10
@@ -29,7 +29,7 @@
 
 Name: gns3-server-30z
 Version: %{gns3server_version}
-Release: 5%{?dist}.zenetys
+Release: 6%{?dist}.zenetys
 Summary: Graphical Network Simulator 3
 
 License: GPLv3
