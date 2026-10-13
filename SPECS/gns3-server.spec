@@ -43,6 +43,8 @@ Source110: https://github.com/GNS3/dynamips/archive/v%{dynamips_version}/%{dynam
 Source120: https://github.com/GNS3/ubridge/archive/v%{ubridge_version}/%{ubridge}.tar.gz
 Source130: https://github.com/GNS3/vpcs/archive/v%{vpcs_version}/%{vpcs}.tar.gz
 
+Patch120: ubridge-1.3.0-netem-prng-seen-old-kernel.patch
+
 BuildRequires: cmake
 BuildRequires: elfutils-libelf-devel
 BuildRequires: gawk
@@ -119,6 +121,9 @@ cd ..
 
 # ubridge
 %setup -T -D -a 120
+cd %{ubridge}
+%patch -P 120 -p1
+cd ..
 
 # vpcs
 %setup -T -D -a 130

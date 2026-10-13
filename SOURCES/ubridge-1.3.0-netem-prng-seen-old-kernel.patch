@@ -1,0 +1,63 @@
+diff --git a/Makefile b/Makefile
+index a98e05e..4fe8fe3 100644
+--- a/Makefile
++++ b/Makefile
+@@ -70,6 +70,18 @@ SRC += src/nio_linux_raw.c             \
+        src/hypervisor_marker.c         \
+        src/netlink/nl.c
+ 
++# Kernel UAPI feature checks (configure-style: does the declaration exist in
++# the headers we build against?). TCA_NETEM_PRNG_SEED is an enum member
++# (Linux >= 6.6 UAPI), so it cannot be probed with #ifdef in the source.
++# "override" keeps the define when CFLAGS is given on the make command line
++# (e.g. make CFLAGS="%{optflags}" from an RPM spec).
++HAVE_NETEM_PRNG_SEED := $(shell echo 'int x = TCA_NETEM_PRNG_SEED;' | \
++	$(CC) $(CPPFLAGS) $(filter-out -MMD -MP,$(CFLAGS)) \
++	-include linux/pkt_sched.h -fsyntax-only -x c - >/dev/null 2>&1 && echo 1)
++ifeq ($(HAVE_NETEM_PRNG_SEED),1)
++    override CFLAGS += -DHAVE_NETEM_PRNG_SEED
++endif
++
+ ifeq ($(SYSTEM_INIPARSER),1)
+     CFLAGS += -DUSE_SYSTEM_INIPARSER
+     LIBS += -liniparser
+diff --git a/src/hypervisor_tc.c b/src/hypervisor_tc.c
+index 172e156..d1a236c 100644
+--- a/src/hypervisor_tc.c
++++ b/src/hypervisor_tc.c
+@@ -333,10 +333,12 @@ static int tc_netem_replace(const char *ifname, const struct netem_params *p)
+         }
+         nla_put_buffer(msg, TCA_NETEM_RATE, &rate, sizeof(rate));
+     }
++#ifdef HAVE_NETEM_PRNG_SEED   /* set by the Makefile (Linux >= 6.6 UAPI) */
+     if (p->has_seed) {
+         unsigned long long seed = p->seed;
+         nla_put_buffer(msg, TCA_NETEM_PRNG_SEED, &seed, sizeof(seed));
+     }
++#endif
+     if (p->dist >= 0) {
+         /* distribution table, verbatim (uniform = no table at all) */
+         const short *tbl;
+@@ -869,6 +871,10 @@ static int cmd_netem(hypervisor_conn_t *conn, int argc, char *argv[])
+             unsigned long long v;
+             if (i + 1 >= argc)
+                 return missing_val(conn, kw);
++#ifndef HAVE_NETEM_PRNG_SEED
++            hypervisor_send_reply(conn, HSC_ERR_INV_PARAM, 1, "seed not supported (netem PRNG seed needs Linux >= 6.6)");
++            return -1;
++#endif
+             v = strtoull(argv[i + 1], &end, 10);
+             if (end == argv[i + 1] || *end != '\0' || v > 0xFFFFFFFFULL) {
+                 hypervisor_send_reply(conn, HSC_ERR_INV_PARAM, 1, "invalid seed value '%s'", argv[i + 1]);
+@@ -1701,7 +1707,11 @@ static int tc_cbpf_capable(void)
+ static int cmd_capabilities(hypervisor_conn_t *conn, int argc, char *argv[])
+ {
+     hypervisor_send_reply(conn, HSC_INFO_OK, 1,
++#ifdef HAVE_NETEM_PRNG_SEED
+                           "netem=delay,jitter,loss,dup,corrupt,rate,reorder,gemodel,dist,seed,limit;"
++#else
++                          "netem=delay,jitter,loss,dup,corrupt,rate,reorder,gemodel,dist,limit;"
++#endif
+                           "ebpf=%d;cbpf=%d;ebpf_modes=nth,quota,window,flow",
+                           tc_ebpf_supported(), tc_cbpf_capable());
+     return 0;
